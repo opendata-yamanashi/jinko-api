@@ -1,0 +1,7 @@
+xlrd
+neologdn
+bs4
+pandas
+fastapi
+requests
+jeraconv

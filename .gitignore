@@ -1,0 +1,5 @@
+env/
+data/
+info.json
+app/__pycache__/
+
