@@ -1,12 +1,17 @@
 from jinko import Yamanashi_Jinko
 from fastapi import FastAPI
+from datetime import datetime 
 
 yj = Yamanashi_Jinko()
 yj.reboot_data()
 
 app = FastAPI()
 
-@app.get('/columns/')
+@app.get('/')
+def hello():
+    return "Hello! Please access /docs"
+
+@app.get('/dtypes/')
 def get_param():
     for i in yj.df["2022"]["1"].columns:
         yield i
@@ -27,15 +32,23 @@ def get_format(year=None, month=None):
         data["month"] = list(yj.df[year].keys())
 
     data["city"] = list(yj.df[year][month].index)
-    data["column"] = list(yj.df[year][month].columns)
-    print(data)
+    data["dtype"] = list(yj.df[year][month].columns)
     return [data]
 
 @app.get('/data/')
-def get_data(year = "latest", month = "latest", city = None):
+def get_data(year = "latest", month = "latest", city = None, dtype = None):
+    now = datetime.now()
     if year == "latest":
-        year = "2022"
+        year = str(now.year)
     if month == "latest":
-        month = "1"
-    
-    return yj.df[year][month]
+        month = str(now.month - 1)
+    if (not city) and (not dtype):
+        return yj.df[year][month]
+    elif city and (not dtype):
+        if not city in yj.df[year][month].index:
+            return {"error": "no city data"}
+        return yj.df[year][month].loc[city]
+    elif (not city) and dtype:
+        return yj.df[year][month][dtype]
+    else:
+        return yj.df[year][month][dtype].loc[city]
