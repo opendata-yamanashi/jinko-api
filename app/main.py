@@ -43,12 +43,20 @@ def get_data(year = "latest", month = "latest", city = None, dtype = None):
     if month == "latest":
         month = str(now.month - 1)
     if (not city) and (not dtype):
-        return yj.df[year][month]
+        return yj.df[year][month].T
     elif city and (not dtype):
         if not city in yj.df[year][month].index:
             return {"error": "no city data"}
-        return yj.df[year][month].loc[city]
+        for key,value in yj.df[year][month].T.iteritems():
+            # print(city, key, city==key)
+            if key == city:
+                return {key: value}
     elif (not city) and dtype:
-        return yj.df[year][month][dtype]
+        fff = dict()
+        for key, value in yj.df[year][month].T.iteritems():
+            fff[key] = {dtype: value[dtype]}
+        return fff
     else:
-        return yj.df[year][month][dtype].loc[city]
+        for key, value in yj.df[year][month].T.iteritems():
+            if key == city:
+                return {city: {dtype: value[dtype]}}
